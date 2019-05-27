@@ -278,10 +278,36 @@ static NSString *const DEFAULT_STARTING_PAGE = @"index.html";
     
     // rewrite starting page www folder path: should load from external storage
     if ([self.viewController isKindOfClass:[CDVViewController class]]) {
-        ((CDVViewController *)self.viewController).wwwFolderName = _filesStructure.wwwFolder.absoluteString;
+        [self switchServerBaseToExternalPath];
     } else {
         NSLog(@"HotCodePushError: Can't make starting page to be from external storage. Main controller should be of type CDVViewController.");
     }
+}
+
+/**
+ * 切换本地服务根目录到外存储目录
+ */
+-(void) switchServerBaseToExternalPath{
+    
+    NSString * basePath = [_filesStructure.wwwFolder.absoluteString stringByReplacingOccurrencesOfString:@"file://" withString:@""];
+    // 先要确保webVieEngine能响应以下两个方法
+    if([self.webViewEngine respondsToSelector:@selector(setServerPath:)] && [self.webViewEngine respondsToSelector:@selector(basePath)]){
+        // 先判断之前的本地服务根目录是否与将要切换的路径相同，如果不相同则切换，否则不切换
+        NSString * preBasePath = [self.webViewEngine performSelector:@selector(basePath)];
+        if( ![preBasePath isEqualToString:basePath]){
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.webViewEngine performSelector:@selector(setServerPath:) withObject:basePath];
+            });
+            
+        }
+      
+        
+        NSLog(@"reset the base server success, start reload app");
+    }else{
+        // 如果不能响应，则不需要再调用切换了，保持APP在未更新状态
+        NSLog(@"cannot reset the base server, keep current page");
+    }
+    
 }
 
 /**
@@ -651,9 +677,15 @@ static NSString *const DEFAULT_STARTING_PAGE = @"index.html";
     
     // send notification to the default callback
     [self invokeDefaultCallbackWithMessage:pluginResult];
-    
+
+     // 热更新下载完毕时需要切换一下服务根目录   
+    [self switchServerBaseToExternalPath];
     // reload application to the index page
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        // reload application to the index page
     [self loadURL:[self indexPageFromConfigXml]];
+
+    });
     
     [self cleanupFileSystemFromOldReleases];
 }
