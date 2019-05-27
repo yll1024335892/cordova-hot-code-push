@@ -27,7 +27,7 @@ As a result, your application receives updates of the web content as soon as pos
 This requires cordova 5.0+ (current stable 1.5.3)
 
 ```sh
-cordova plugin add cordova-hot-code-push-plugin
+cordova plugin add teh-hot-code-push-plugin
 ```
 
 It is also possible to install via repo url directly (__unstable__)
@@ -58,7 +58,7 @@ In this guide we will show how quickly you can test this plugin and start using 
 2. Add plugin:
 
   ```sh
-  cordova plugin add cordova-hot-code-push-plugin
+  cordova plugin add teh-hot-code-push-plugin
   ```
 
 3. Add plugin for local development:

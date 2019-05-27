@@ -1,9 +1,9 @@
 {
-  "name": "cordova-hot-code-push-plugin",
-  "version": "1.5.3",
-  "description": "Cordova plugin to perform code updates on the fly",
+  "name": "teh-hot-code-push-plugin",
+  "version": "1.0.2",
+  "description": "Cordova plugin adopt to webview2.0",
   "cordova": {
-    "id": "cordova-hot-code-push-plugin",
+    "id": "teh-hot-code-push-plugin",
     "platforms": [
       "android",
       "ios"
