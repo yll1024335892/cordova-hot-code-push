@@ -5,7 +5,7 @@
 //
 
 #import <Cordova/CDVConfigParser.h>
-
+#import <Cordova/NSDictionary+CordovaPreferences.h>
 #import "HCPPlugin.h"
 #import "HCPFileDownloader.h"
 #import "HCPFilesStructure.h"
@@ -248,7 +248,12 @@ static NSString *const DEFAULT_STARTING_PAGE = @"index.html";
  */
 - (void)loadURL:(NSString *)url {
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        NSURL *loadURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@", _filesStructure.wwwFolder.absoluteString, url]];
+        // 因为只重启了本地服务，只需要重新加载首页就行
+        NSString * baseUrl = @"http://localhost";
+        int portNumber = [self.commandDelegate.settings cordovaFloatSettingForKey:@"WKPort" defaultValue:8080];
+    
+        NSString *path =  [NSString stringWithFormat:@"%@:%d", baseUrl, portNumber];
+        NSURL *loadURL = [NSURL URLWithString:path];
         NSURLRequest *request = [NSURLRequest requestWithURL:loadURL
                                                  cachePolicy:NSURLRequestReloadIgnoringCacheData
                                              timeoutInterval:10000];
@@ -294,7 +299,7 @@ static NSString *const DEFAULT_STARTING_PAGE = @"index.html";
     if([self.webViewEngine respondsToSelector:@selector(setServerPath:)] && [self.webViewEngine respondsToSelector:@selector(basePath)]){
         // 先判断之前的本地服务根目录是否与将要切换的路径相同，如果不相同则切换，否则不切换
         NSString * preBasePath = [self.webViewEngine performSelector:@selector(basePath)];
-        if( ![preBasePath isEqualToString:basePath]){
+        if( ![preBasePath isEqualToString:basePath] && [[NSFileManager defaultManager] fileExistsAtPath:basePath]){
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.webViewEngine performSelector:@selector(setServerPath:) withObject:basePath];
             });
@@ -531,6 +536,7 @@ static NSString *const DEFAULT_STARTING_PAGE = @"index.html";
     // send notification to the associated callback
     CDVPluginResult *pluginResult = [CDVPluginResult pluginResultForNotification:notification];
     if (_downloadCallback) {
+        
         [self.commandDelegate sendPluginResult:pluginResult callbackId:_downloadCallback];
         _downloadCallback = nil;
     }
