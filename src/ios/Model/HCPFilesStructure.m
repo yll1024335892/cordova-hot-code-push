@@ -45,7 +45,7 @@ static NSString *const CHCP_MANIFEST_FILE_PATH = @"chcp.manifest";
 
     // construct path to the folder, where we will store our plugin's files
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSURL *supportDir = [fileManager applicationSupportDirectory];
+    NSURL *supportDir = [fileManager applicationCacheDirectory];
     _pluginRootFolder = [supportDir URLByAppendingPathComponent:CHCP_FOLDER isDirectory:YES];
     if (![fileManager fileExistsAtPath:_pluginRootFolder.path]) {
         [fileManager createDirectoryAtURL:_pluginRootFolder withIntermediateDirectories:YES attributes:nil error:nil];
